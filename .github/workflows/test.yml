@@ -23,6 +23,6 @@ jobs:
 
       - uses: dschep/install-poetry-action@v1.3
 
-      - run: poetry --dev run scripts/test.sh check
+      - run: poetry run scripts/test.sh check
 
       - uses: codecov/codecov-action@v1
