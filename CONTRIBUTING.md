@@ -20,3 +20,5 @@ Please note we have a code of conduct, please follow it in all your interactions
 4. Fix the issue!
 5. Ensure nothing broke `./scripts/test.sh`
 5. Submit a pull request.
+
+I recommend adding `./scripts/test.sh` as a pre-commit hook.
