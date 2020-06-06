@@ -71,4 +71,4 @@ capture \
 
 capture \
 	poetry run \
-		pytest --quiet --cov="${src}" --cov=tests --cov-report=term-missing --exitfirst
+		pytest --quiet --cov --cov-report=xml --cov-report=term-missing --exitfirst
