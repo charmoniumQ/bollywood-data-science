@@ -1,28 +1,26 @@
 name: Test
 
-on:
-  push:
-  pull_request:
-    types: [opened, synchronize]
-
+on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.8.0]
       fail-fast: true
 
     steps:
 
       - uses: actions/checkout@v2
 
-      - uses: abatilo/actions-poetry@v1.5.0
+      - uses: actions/setup-python@v1
         with:
-          python_version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
 
-      - run: python -m poetry install
+      - uses: dschep/install-poetry-action@v1.3
 
-      - run: python -m poetry run scripts/test.sh check
+      - run: poetry install
+
+      - run: poetry run scripts/test.sh check
 
       - uses: codecov/codecov-action@v1
