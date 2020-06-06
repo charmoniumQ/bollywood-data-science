@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -e
+set -e -x
+cd "$(dirname "${0}")/.."
 
-# https://python-poetry.org/docs/libraries/
-# https://python-poetry.org/docs/cli/#publish
 poetry publish  --build

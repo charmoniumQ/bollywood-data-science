@@ -1,7 +1,5 @@
-# package imports
-from bollywood_data_science.module import Human
+import bollywood_data_science
 
 
-def test_human():
-    jon_snow = Human(name="Jon Snow")
-    assert isinstance(jon_snow, Human) == True
+def test_test() -> None:
+    pass
