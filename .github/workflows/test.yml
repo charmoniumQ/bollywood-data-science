@@ -21,8 +21,8 @@ jobs:
         with:
           python_version: ${{ matrix.python-version }}
 
-      - run: poetry install
+      - run: python -m poetry install
 
-      - run: poetry run scripts/test.sh check
+      - run: python -m poetry run scripts/test.sh check
 
       - uses: codecov/codecov-action@v1
