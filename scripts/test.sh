@@ -25,11 +25,11 @@ function capture() {
 		if [ "${command_exit}" -eq 0 ]; then
 			echo -e "\033[32;1m\$ ${command[@]}\033[0m"
 			cat "${log}"
-			echo -e "\033[32;1mexitted ${command_exit} in ${command_duration}\033[0m"
+			echo -e "\033[32;1mexitted ${command_exit} in ${command_duration}s\033[0m"
 		else
 			echo -e "\033[31;1m\$ ${command[@]}\033[0m"
 			cat "${log}"
-			echo -e "\033[31;1mexitted ${command_exit} in ${command_duration}\033[0m"
+			echo -e "\033[31;1mexitted ${command_exit} in ${command_duration}s\033[0m"
 			exit "${command_exit}"
 		fi
 	fi
