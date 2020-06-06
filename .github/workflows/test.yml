@@ -17,11 +17,10 @@ jobs:
 
       - uses: actions/checkout@master
 
-      - uses: actions/setup-python@v1
+      - uses: abatilo/actions-poetry@v1.5.0
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - uses: dschep/install-poetry-action@v1.3
+          python_version: ${{ matrix.python-version }}
+          args: install
 
       - run: poetry run scripts/test.sh check
 

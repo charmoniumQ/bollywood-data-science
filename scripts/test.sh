@@ -21,12 +21,7 @@ function capture() {
 			echo -e "\033[31;1m\$ ${command[@]}\033[0m"
 			cat "${log}"
 			echo -e "\033[31;1mexitted ${command_exit}\033[0m"
-			if [ -z "${check}" ]; then
-				# We are not in check mode
-				# I am running interactively
-				# Exit on first failure, because fixing early failures could fix future ones
-				exit "${command_exit}"
-			fi
+			exit "${command_exit}"
 		fi
 	fi
 }
@@ -67,4 +62,4 @@ capture \
 
 capture \
 	poetry run \
-		pytest --quiet --cov="${src}" --cov=tests --cov-report=term-missing $([ -n "${check}" ] || echo "--exitfirst")
+		pytest --quiet --cov="${src}" --cov=tests --cov-report=term-missing --exitfirst
