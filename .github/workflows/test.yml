@@ -1,10 +1,6 @@
 name: Test
 
-on:
-  push:
-  pull_request:
-    types: [opened, synchronize]
-
+on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,7 +11,7 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v1
         with:
@@ -23,6 +19,8 @@ jobs:
 
       - uses: dschep/install-poetry-action@v1.3
 
-      - run: poetry --dev run scripts/test.sh check
+      - run: poetry install
+
+      - run: poetry run scripts/test.sh check
 
       - uses: codecov/codecov-action@v1
