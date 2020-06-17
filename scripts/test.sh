@@ -2,10 +2,24 @@
 
 cd "$(dirname "${0}")/.."
 
-package=bollywood_data_science
-src="./${package}"
-check=$([ "${1}" = "check" ] && echo "true" || echo "")
+check=${check:-}
 verbose=${verbose:-}
+skip_lint=${skip_lint:-}
+htmlcov=${htmlcov:-}
+codecov=${codecov:-}
+
+package_name="bollywood_data_science"
+package_path="./$(echo ${package_name} | sed 's/\./\//g')"
+srcs="${package_path} tests/ stubs/ $(find scripts/ -name '*.py')"
+
+function excluding() {
+	# Usage: excluding needle haystack...
+	for var in "$@"; do
+		if [[ ! "${var}" =~ "${1}" ]]; then
+			echo -e "$var "
+		fi
+	done
+}
 
 function now() {
 	python -c 'import datetime; print((datetime.datetime.now() - datetime.datetime(1970, 1, 1)).total_seconds())'
@@ -23,11 +37,11 @@ function capture() {
 
 	if [ -s "${log}" -o "${command_exit}" -ne 0 -o -n "${verbose}" ]; then
 		if [ "${command_exit}" -eq 0 ]; then
-			echo -e "\033[32;1m\$ ${command[@]}\033[0m"
+			echo -e "\033[32;1m\$ ${command[@]} \033[0m"
 			cat "${log}"
 			echo -e "\033[32;1mexitted ${command_exit} in ${command_duration}s\033[0m"
 		else
-			echo -e "\033[31;1m\$ ${command[@]}\033[0m"
+			echo -e "\033[31;1m\$ ${command[@]} \033[0m"
 			cat "${log}"
 			echo -e "\033[31;1mexitted ${command_exit} in ${command_duration}s\033[0m"
 			exit "${command_exit}"
@@ -35,40 +49,59 @@ function capture() {
 	fi
 }
 
-# Auto formatting
+flag_verbose_or_quiet=$([ -n "${verbose}" ] && echo "--verbose" || echo "--quiet")
+flag_verbose=$([ -n "${verbose}" ] && echo "--verbose")
+flag_check_or_in_place=$([ -n "${check}" ] && echo "--check" || echo "--in-place")
+flag_check_only=$([ -n "${check}" ] && echo "--check-only")
+flag_check=$([ -n "${check}" ] && echo "--check")
+
+
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		poetry run \
+			autoflake --recursive ${flag_check_or_in_place} ${srcs}
+
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		poetry run \
+			isort --recursive ${flag_check_only} ${srcs}
+
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		poetry run \
+			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
+
+[[ -n "${skip_lint}" ]] || \
+	capture \
+		poetry run \
+			sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
 
 capture \
 	poetry run \
-		autoflake --recursive $([ -n "${check}" ] && echo "--check" || echo "--in-place") "${src}" tests
+		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
+			mypy --namespace-packages -p ${package_name}
+capture \
+	poetry run \
+		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
+			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
+# ${flag_verbose} is too verbose here
+
+# Note that I can't use dmypy because I have a package (-p) and files
+# to check, which are (unfortunately) mutually exclusive arguments.
 
 capture \
 	poetry run \
-		isort --recursive $([ -n "${check}" ] && echo "--check-only") "${src}" tests
+		pytest --quiet --exitfirst  --cov="${package_path}" --cov-report=term-missing  tests
+# I only care about --cov= in the exported package
 
-capture \
-	poetry run \
-		black --quiet --target-version py38 $([ -n "${check}" ] && echo "--check") "${src}" tests
+[[ -z "${htmlcov}" ]] || \
+	xdg-open htmlcov/index.html
 
-# Linting (formatting/style tests)
+poetry run \
+	coverage html -d htmlcov
 
-capture \
-	poetry run \
-		sh -c "pylint ${src} tests || poetry run pylint-exit -efail ${?}"
+[[ -z "${CODECOV_TOKEN}" ]] || \
+	capture \
+		poetry run \
+			codecov
 
-# Static analysis
-
-# capture \
-# 	poetry run \
-# 		env PYTHONPATH="src:${PYTHONPATH}" \
-# 			bandit --recursive src
-
-capture \
-	poetry run \
-		env PYTHONPATH="$(dirname "${src}"):${PYTHONPATH}" \
-			dmypy run -- tests
-
-# Unit tests
-
-capture \
-	poetry run \
-		pytest --quiet --cov --cov-report=xml --cov-report=term-missing --exitfirst
