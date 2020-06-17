@@ -172,6 +172,14 @@ python-versions = "*"
 version = "3.0.4"
 
 [[package]]
+category = "main"
+description = "Provides a decorator for caching a function and an equivalent command-line util."
+name = "charmonium.cache"
+optional = false
+python-versions = ">=3.6,<4.0"
+version = "0.4.0"
+
+[[package]]
 category = "dev"
 description = "Composable command line interface toolkit"
 name = "click"
@@ -384,7 +392,6 @@ testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pyt
 [[package]]
 category = "dev"
 description = "A fast and thorough lazy object proxy."
-marker = "python_version >= \"3\""
 name = "lazy-object-proxy"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
@@ -1043,14 +1050,13 @@ version = "0.5.1"
 [[package]]
 category = "dev"
 description = "Module for decorators, wrappers and monkey patching."
-marker = "python_version >= \"3\""
 name = "wrapt"
 optional = false
 python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "5134fa532c61da47c3c75a0b041b5c51b7bf2ff2b1e1f184779939baf7afcb05"
+content-hash = "8a4c44ff37f08a067d2dc04e54d5793b0926ac2176d7da49678fd91fb3da5f31"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1141,6 +1147,10 @@ cffi = [
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
+]
+"charmonium.cache" = [
+    {file = "charmonium.cache-0.4.0-py3-none-any.whl", hash = "sha256:349b89ce22f1282520ee307d86fcf2c38396fd1d629286d2a5acd310aaf6641f"},
+    {file = "charmonium.cache-0.4.0.tar.gz", hash = "sha256:b57973e1d827e91c4683d393f3dca805bcebb85854fdf3a2c5aa87a401589f43"},
 ]
 click = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},

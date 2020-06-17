@@ -1,31 +1,19 @@
-from typing import Optional
+from typing import Any, Dict, cast
+
+import charmonium.cache as ch_cache
+import rdflib
+from SPARQLWrapper import SPARQLWrapper, Wrapper
 
 
-def returns_four(x: Optional[int] = None) -> int:
-    """Short description (should be an capitalized and punctuated imperative-verb-phrase or noun-phrase).
-
-    This is the first paragraph in the long description. All sections
-    of this doc-string can be styled with `reStructuredText`_.
-
-    .. _`reStructuredText`: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-
-    >>> import bollywood_data_science
-    >>> bollywood_data_science.returns_four()
-    4
-    >>> print("doctest is running")
-    doctest is running
-
-    This is the last paragraph of the long description, after which a
-    block describes the arguments and returned value in any format accepted by (`napoleon`_).
-
-    .. _`napoleon`: https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
-
-    Args:
-        x: The value to consume (capitalized and punctuated noun phrase).
-
-    Returns:
-        A four (capitalized and punctuated noun phrase).
-
-    """
-
-    return 4
+@ch_cache.decor(ch_cache.DirectoryStore.create("tmp"))
+def cached_sparql_graph(
+    endpoint: str, query_string: str, **kwargs: Dict[str, Any]
+) -> rdflib.Graph:
+    """Query a SPARQL endpoint, but cache the resulting RDF"""
+    sparql_req = SPARQLWrapper(
+        endpoint=endpoint, returnFormat=Wrapper.JSONLD, **kwargs,
+    )
+    sparql_req.setQuery(query_string)
+    query_result = sparql_req.query()
+    graph = query_result.convert()
+    return cast(rdflib.Graph, graph)
