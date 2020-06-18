@@ -1,0 +1,3 @@
+class Process:
+    def __init__(self, int) -> None: ...
+    def memory_info(self) -> MemoryInfo:

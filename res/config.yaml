@@ -1,0 +1,59 @@
+queries:
+  wikidata_get: &wikidata_get
+    endpoint: https://query.wikidata.org/sparql
+    return_format: xml
+    headers: {"Accept": "application/sparql-results+xml"}
+    method: GET
+    query: |
+      PREFIX wd: <http://www.wikidata.org/entity/>
+      PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+      CONSTRUCT {
+        ?person wdt:P106 ?occupation .
+        ?person wdt:P345 ?personImdbId .
+        ?person wdt:P21 ?sex . 
+        ?person wdt:P569 ?dateOfBirth .
+        ?person wdt:P570 ?dateOfDeath .
+        ?person wdt:P19 ?placeOfBirth .
+        ?person wdt:P22 ?father .
+        ?person wdt:P25 ?mother .
+        ?person wdt:P3448 ?stepParent .
+        ?person wdt:P26 ?spouse .
+        ?person wdt:P69 ?school .
+        ?person wdt:P551 ?residence .
+        ?person wdt:P2031 ?workPeriodStart .
+        ?person wdt:P2032 ?workPeriodEnd .
+        ?person wdt:P172 ?ethnicGroup .
+        ?person wdt:P149 ?religion .
+        ?person wdt:1412 ?langauage .
+        ?person wdt:P39 ?positionHeld .
+      } WHERE {
+        ?person wdt:P106 wd:Q33999 .
+        ?person wdt:P106 ?occupation .
+        {
+          { ?person wdt:P27 wd:Q668 . } UNION
+          { ?person wdt:P19/wdt:? wd:Q668 . } UNION
+          { ?person wdt:P19/wdt:? wd:Q129286 . } .
+        } .
+        OPTIONAL { ?person wdt:P21 ?sex . } .
+        OPTIONAL { ?person wdt:P345 ?personImdbId . } .
+        OPTIONAL { ?person wdt:P569 ?dateOfBirth . } .
+        OPTIONAL { ?person wdt:P570 ?dateOfDeath . } .
+        OPTIONAL { ?person wdt:P19 ?placeOfBirth . } .
+        OPTIONAL { ?person wdt:P22 ?father . } .
+        OPTIONAL { ?person wdt:P25 ?mother . } .
+        OPTIONAL { ?person wdt:P3448 ?stepParent . } .
+        OPTIONAL { ?person wdt:P26 ?spouse . } .
+        OPTIONAL { ?person wdt:P69 ?school . } .
+        OPTIONAL { ?person wdt:P551 ?residence . } .
+        OPTIONAL { ?person wdt:P2031 ?workPeriodStart . } . 
+        OPTIONAL { ?person wdt:P2032 ?workPeriodEnd . } . 
+        OPTIONAL { ?person wdt:172 ?ethnicGroup . } .
+        OPTIONAL { ?person wdt:149 ?religion . } .
+        OPTIONAL { ?person wdt:1412 ?langauage . } .
+        OPTIONAL { ?person wdt:P39 ?positionHeld . } .
+      }
+
+  wikidata_post:
+    <<: *wikidata_get
+    headers: {"Accept": "application/sparql-results+xml", "Content-Type": "application/sparql-query"}
+    method: POST

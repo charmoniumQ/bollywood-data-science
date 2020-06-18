@@ -21,13 +21,29 @@ SELECT DISTINCT ?person WHERE {
 [WikiData](https://query.wikidata.org/)
 
 ```
-SELECT DISTINCT ?person WHERE {
-  ?person wdt:P106 wd:Q33999 .
-  {
-          { ?person wdt:P27 wd:Q668 . }
-    UNION { ?person wdt:P19/wdt:? wd:Q668 . }
-  } .
-}
+      PREFIX wd: <http://www.wikidata.org/entity/>
+      PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      CONSTRUCT {
+        ?person rdf:label ?personLabel .
+        ?person wdt:P345 ?personImd .
+        ?person wdt:P569 ?dob .
+        ?person wdt:P19 ?pob .
+        ?person wdt:P22 ?father .
+        ?person wdt:P25 ?mother .
+      } WHERE {
+        ?person wdt:P106 wd:Q33999 .
+        {
+          { ?person wdt:P27 wd:Q668 . } UNION
+          { ?person wdt:P19/wdt:? wd:Q668 . } .
+        } .
+        OPTIONAL { ?person wdt:P345 ?imdb . } .
+		OPTIONAL { ?person wdt:P569 ?dob . } .
+		OPTIONAL { ?person wdt:P19 ?pob . } .
+		OPTIONAL { ?person wdt:P22 ?father . } .
+		OPTIONAL { ?person wdt:P25 ?mother . } .
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . } .
+      } LIMIT 1000
 ```
 
 [YAGO3](https://yago-knowledge.org/sparql)

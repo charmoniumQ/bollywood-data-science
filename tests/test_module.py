@@ -1,5 +1,5 @@
-import bollywood_data_science
+import bollywood_data_science._lib
 
 
 def test_test() -> None:
-    pass
+    graph = bollywood_data_science._lib.get_dataset()
