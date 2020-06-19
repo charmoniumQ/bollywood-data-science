@@ -194,7 +194,18 @@ description = "Provides a decorator for caching a function and an equivalent com
 name = "charmonium.cache"
 optional = false
 python-versions = ">=3.6,<4.0"
-version = "0.4.2"
+version = "0.6.0"
+
+[[package]]
+category = "main"
+description = "Time a block of code."
+name = "charmonium.time-block"
+optional = false
+python-versions = ">=3.6,<4.0"
+version = "0.1.0"
+
+[package.dependencies]
+psutil = ">=5.7.0,<6.0.0"
 
 [[package]]
 category = "dev"
@@ -1200,7 +1211,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "20e5670726fb9b643e9f255dbe058efb7320b123f5bcf785e2424b7593698d4a"
+content-hash = "72bb59cdaa6b0487108eb83d1870b952e61a7c6d55e3522328e693c8edc97def"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1301,8 +1312,12 @@ chardet = [
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 "charmonium.cache" = [
-    {file = "charmonium.cache-0.4.2-py3-none-any.whl", hash = "sha256:f29d030c22759cd4563456108f83dfaba611e57d7cbb385b56c8c34b636c7b21"},
-    {file = "charmonium.cache-0.4.2.tar.gz", hash = "sha256:abf45c033a8e90bc3ae08a20a69c325382463d5d8f092c07a15ca79755c38d3b"},
+    {file = "charmonium.cache-0.6.0-py3-none-any.whl", hash = "sha256:a55f30873dc009545444213577d357d01d392860c3d8b48e491e0a72b1c71c25"},
+    {file = "charmonium.cache-0.6.0.tar.gz", hash = "sha256:f07ac0b1e6d3b759ba01dee3549a7fe01cb1f6bd4ceb6cddc203abc8cdf022a1"},
+]
+"charmonium.time-block" = [
+    {file = "charmonium.time_block-0.1.0-py3-none-any.whl", hash = "sha256:c34db79f3a5b7f0d1c6e6067dcb00920c583bc9f2e758759be7229b3c5a06b44"},
+    {file = "charmonium.time_block-0.1.0.tar.gz", hash = "sha256:bb656e3130c2465b36665385442e6b612e4ea710c351cd67d13f5e6fd35d3635"},
 ]
 click = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
@@ -1702,6 +1717,7 @@ regex = [
     {file = "regex-2020.6.8.tar.gz", hash = "sha256:e9b64e609d37438f7d6e68c2546d2cb8062f3adb27e6336bc129b51be20773ac"},
 ]
 requests = [
+    {file = "requests-2.23.0-py2.7.egg", hash = "sha256:5d2d0ffbb515f39417009a46c14256291061ac01ba8f875b90cad137de83beb4"},
     {file = "requests-2.23.0-py2.py3-none-any.whl", hash = "sha256:43999036bfa82904b6af1d99e4882b560e5e2c68e5c4b0aa03b655f3d7d73fee"},
     {file = "requests-2.23.0.tar.gz", hash = "sha256:b3f43d496c6daba4493e7c431722aeb7dbc6288f52a6e04e7b6023b0247817e6"},
 ]

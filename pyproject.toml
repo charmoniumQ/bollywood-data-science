@@ -21,8 +21,9 @@ rdflib = "^5.0.0"
 requests = "^2.23.0"
 inquirer = "^2.7.0"
 pyyaml = "^5.3.1"
-"charmonium.cache" = "^0.4.2"
 psutil = "^5.7.0"
+"charmonium.time_block" = "^0.1.0"
+"charmonium.cache" = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 twine = "^3.1.1"

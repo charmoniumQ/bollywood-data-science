@@ -1,17 +1,13 @@
-import logging
 import re
 import sys
 import urllib.parse
 from typing import Any, Dict, Optional, cast
 
 import charmonium.cache as ch_cache
+import charmonium.time_block as ch_time_block
 import rdflib
 import requests
 import yaml
-
-from .time_code import time_code
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 def _cached_sparql_graph(
@@ -79,12 +75,13 @@ class _CacheSparqlGraph:
 
 cached_sparql_graph = cast(
     _CacheSparqlGraph,
-    time_code.decor(run_gc=True)(
-        ch_cache.decor(ch_cache.DirectoryStore.create("tmp"))(_cached_sparql_graph)
-    ),
+    ch_cache.decor(
+        ch_cache.DirectoryStore.create("tmp"), verbose=True, name="cache_sparql_graph",
+    )(_cached_sparql_graph),
 )
 
 
+@ch_time_block.decor()
 def get_dataset() -> rdflib.Graph:
     with open("res/config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -107,8 +104,10 @@ def get_dataset() -> rdflib.Graph:
 if __name__ == "__main__":
 
     def main() -> None:
-        for subj, verb, obj in get_dataset():
-            pass
-            # print(f'{subj} <-{verb}-> {obj}')
+        people = set()
+        graph = get_dataset()
+        for subj, verb, obj in graph:
+            people.add(subj)
+        print(dict(triples=len(graph), people=len(people)))
 
     main()
