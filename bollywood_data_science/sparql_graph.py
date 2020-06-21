@@ -1,7 +1,7 @@
 import re
 import sys
 import urllib.parse
-from typing import Any, Dict, Optional, cast, Callable
+from typing import Any, Callable, Dict, Optional, cast
 
 import charmonium.cache as ch_cache
 import charmonium.time_block as ch_time_block
@@ -62,8 +62,10 @@ def sparql_graph(
 cached_sparql_graph = cast(
     Callable[..., rdflib.Graph],
     ch_time_block.decor()(
-    ch_cache.decor(
-        ch_cache.DirectoryStore.create("tmp"), verbose=True, name="cache_sparql_graph",
-    )(sparql_graph)
-    )
+        ch_cache.decor(
+            ch_cache.DirectoryStore.create("tmp"),
+            verbose=True,
+            name="cache_sparql_graph",
+        )(sparql_graph)
+    ),
 )

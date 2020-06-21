@@ -16,7 +16,6 @@ include = ["res/"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-imdbpy = "^6.8"
 rdflib = "^5.0.0"
 requests = "^2.23.0"
 inquirer = "^2.7.0"
@@ -24,6 +23,9 @@ pyyaml = "^5.3.1"
 psutil = "^5.7.0"
 "charmonium.time_block" = "^0.1.0"
 "charmonium.cache" = "^0.6.0"
+aiohttp = {extras = ["speedps"], version = "^3.6.2"}
+aiofiles = "^0.5.0"
+imdbpy = {git = "https://github.com/alberanid/imdbpy"}
 
 [tool.poetry.dev-dependencies]
 twine = "^3.1.1"
