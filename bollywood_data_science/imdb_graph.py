@@ -15,10 +15,11 @@ from tqdm import tqdm
 
 
 async def download_url(session: aiohttp.ClientSession, url: str, path: Path) -> None:
-    with ch_time_block.ctx(f"Download {path.name}"):
-        async with session.get(url) as source_fobj:
-            async with aiofiles.open(path, "w+") as dest_fobj:
-                await dest_fobj.write(await source_fobj.read())
+    if not path.exists():
+        with ch_time_block.ctx(f"download {path.name}"):
+            async with session.get(url) as source_fobj:
+                async with aiofiles.open(path, "wb+") as dest_fobj:
+                    await dest_fobj.write(await source_fobj.read())
 
 
 imdb_source_urls = [
@@ -32,34 +33,31 @@ imdb_source_urls = [
 ]
 
 
-@ch_cache.decor(ch_cache.FileStore.create("tmp"))
+@ch_cache.decor(ch_cache.FileStore.create("/tmp/tmp"), verbose=True)
 def download_imdb(cache_path: Path) -> str:
-    with tempfile.TemporaryDirectory() as tmp_path_:
-        tmp_path = Path(tmp_path_)
+    async def async_part() -> None:
+        async with aiohttp.ClientSession() as session:
+            await asyncio.gather(
+                *[
+                    download_url(
+                        session,
+                        url,
+                        cache_path / Path(urllib.parse.urlparse(url).path).name,
+                    )
+                    for url in imdb_source_urls
+                ]
+            )
 
-        async def async_part() -> None:
-            async with aiohttp.ClientSession() as session:
-                await asyncio.gather(
-                    *[
-                        download_url(
-                            session,
-                            url,
-                            tmp_path / Path(urllib.parse.urlparse(url).path).name,
-                        )
-                        for url in imdb_source_urls
-                    ]
-                )
-
-        asyncio.run(async_part())
-        db_url = "sqlite:///{cache_path / 'imdb.sqlite'}"
-        subprocess.run(
-            ["s32imdbpy.py", str(cache_path), db_url], check=True,
-        )
-        return db_url
+    asyncio.run(async_part())
+    db_url = f"sqlite:///{cache_path / 'imdb.sqlite'}"
+    subprocess.run(
+        ["s32imdbpy.py", "--verbose", str(cache_path), db_url], check=True,
+    )
+    return db_url
 
 
 def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
-    download_imdb(Path("tmp"))
+    download_imdb(Path("/tmp/tmp"))
     ia = IMDb("s3", "postgres://user:password@localhost/imdb")
     graph = rdflib.Graph()
     imdb_ns = rdflib.Namespace("https://imdb.com/")
@@ -68,6 +66,7 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
         person = ia.get_person(imdb_id[2:])
         person_term = rdflib.Literal(imdb_id)
 
+        dates = []
         for filmography in person.get("filmography", {}):
             for role in filmography.keys():
                 for movie in filmography.get(role, []):
@@ -78,6 +77,10 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
                             rdflib.Literal(f"tt{movie.movieID}"),
                         )
                     )
+                    if "year" in movie:
+                        dates.append(movie["year"])
+        graph.add((person_term, imdb_ns.term("work_start"), rdflib.Literal(min(dates))))
+        graph.add((person_term, imdb_ns.term("work_stop" ), rdflib.Literal(max(dates))))
 
         for award in person.get("awards", []):
             graph.add((person_term, imdb_ns.term("award"), rdflib.Literal(award),))
@@ -86,5 +89,11 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
             graph.add(
                 (person_term, imdb_ns.term("trademark"), rdflib.Literal(trademark),)
             )
+
+        if "birth date" in person:
+            graph.add((person_term, imdb_ns.term("birth_date"), rdflib.Literal(person["birth date"], datatype=rdflib.XSD.date)))
+
+        if "death date" in person:
+            graph.add((person_term, imdb_ns.term("death_date"), rdflib.Literal(person["death date"], datatype=rdflib.XSD.date)))
 
     return graph

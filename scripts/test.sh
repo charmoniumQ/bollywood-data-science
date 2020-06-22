@@ -107,5 +107,5 @@ capture \
 # 		poetry run \
 # 			codecov
 
-peotry run \
+poetry run \
 	python3 -m ${package_name}.main

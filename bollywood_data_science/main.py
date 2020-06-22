@@ -1,5 +1,7 @@
+import charmonium.time_block as ch_time_block
 import yaml
 
+from .imdb_graph import imdb_graph
 from .sparql_graph import cached_sparql_graph
 
 
@@ -18,11 +20,25 @@ def main() -> None:
     graph = cached_sparql_graph(
         endpoint, query, return_format=return_format, headers=headers, method=method,
     )
-    people = set()
-    for subj, _verb, _obj in graph:
-        people.add(subj)
-    print(dict(triples=len(graph), people=len(people)))
 
+    with ch_time_block.ctx("selecting"):
+        people = set([
+            str(row[0])
+            for row in graph.query("SELECT DISTINCT ?person WHERE { ?person ?prop ?thing }")
+        ])
+        imdb_ids = set([
+            str(row[0])
+            for row in graph.query("SELECT DISTINCT ?personImdbId WHERE { ?person wdt:P345 ?personImdbId }")
+        ])
+    print(dict(
+        triples=len(graph),
+        people=len(people),
+        imdb_ids=len(imdb_ids),
+    ))
+    graph_imdb = imdb_graph(imdb_ids)
+    print(dict(
+        graph_imdb=len(graph_imdb)
+    ))
 
 if __name__ == "__main__":
     main()

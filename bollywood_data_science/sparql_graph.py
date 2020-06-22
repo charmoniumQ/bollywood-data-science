@@ -24,6 +24,9 @@ def sparql_graph(
     if minify:
         query = re.sub(r"\s+", " ", query.strip())
 
+    if "CONSTRUCT" not in query:
+        raise ValueError("Must use a CONSTRUCT query to build a graph.")
+
     headers_ = headers if headers else dict()
     params_ = params if params else dict()
 
@@ -53,7 +56,12 @@ def sparql_graph(
 
     if rdflib.plugin.get(return_format, rdflib.parser.Parser):
         graph = rdflib.Graph()
-        graph.parse(data=text_req, format=return_format)
+        try:
+            graph.parse(data=text_req, format=return_format)
+        except Exception as e:
+            with open("temp.txt", "w+") as f:
+                f.write(text_req)
+            raise e
         return graph
     else:
         raise RuntimeError(f"rdflib has no plugin for {return_format}")
@@ -63,7 +71,7 @@ cached_sparql_graph = cast(
     Callable[..., rdflib.Graph],
     ch_time_block.decor()(
         ch_cache.decor(
-            ch_cache.DirectoryStore.create("tmp"),
+            ch_cache.DirectoryStore.create("/tmp/tmp"),
             verbose=True,
             name="cache_sparql_graph",
         )(sparql_graph)

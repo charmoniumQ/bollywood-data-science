@@ -26,6 +26,7 @@ psutil = "^5.7.0"
 aiohttp = {extras = ["speedps"], version = "^3.6.2"}
 aiofiles = "^0.5.0"
 imdbpy = {git = "https://github.com/alberanid/imdbpy"}
+tqdm = "^4.46.1"
 
 [tool.poetry.dev-dependencies]
 twine = "^3.1.1"

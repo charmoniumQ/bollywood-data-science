@@ -8,3 +8,4 @@ from .term import (
     URIRef as URIRef,
     Variable as Variable,
 )
+from . import XSD as XSD

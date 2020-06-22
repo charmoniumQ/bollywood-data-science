@@ -1,5 +1,5 @@
-from typing import Mapping, Any
 import abc
+from typing import Any, Mapping
 
 class IMDb:
     def __init__(self, method: str = ..., path: str = ...) -> None: ...
