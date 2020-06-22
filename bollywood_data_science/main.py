@@ -22,23 +22,24 @@ def main() -> None:
     )
 
     with ch_time_block.ctx("selecting"):
-        people = set([
-            str(row[0])
-            for row in graph.query("SELECT DISTINCT ?person WHERE { ?person ?prop ?thing }")
-        ])
-        imdb_ids = set([
-            str(row[0])
-            for row in graph.query("SELECT DISTINCT ?personImdbId WHERE { ?person wdt:P345 ?personImdbId }")
-        ])
-    print(dict(
-        triples=len(graph),
-        people=len(people),
-        imdb_ids=len(imdb_ids),
-    ))
+        people = {
+            "1"
+            # str(row[0])
+            # for row in graph.query(
+            #     "SELECT DISTINCT ?person WHERE { ?person ?prop ?thing }"
+            # )
+        }
+        imdb_ids = {
+            "1"
+            # str(row[0])
+            # for row in graph.query(
+            #     "SELECT DISTINCT ?personImdbId WHERE { ?person wdt:P345 ?personImdbId }"
+            # )
+        }
+    print(dict(triples=len(graph), people=len(people), imdb_ids=len(imdb_ids),))
     graph_imdb = imdb_graph(imdb_ids)
-    print(dict(
-        graph_imdb=len(graph_imdb)
-    ))
+    print(dict(graph_imdb=len(graph_imdb)))
+
 
 if __name__ == "__main__":
     main()

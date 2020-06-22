@@ -1,6 +1,5 @@
 import asyncio
 import subprocess
-import tempfile
 import urllib.parse
 from pathlib import Path
 from typing import Set
@@ -49,7 +48,12 @@ def download_imdb(cache_path: Path) -> str:
             )
 
     asyncio.run(async_part())
-    db_url = f"sqlite:///{cache_path / 'imdb.sqlite'}"
+    # db_url = f"sqlite:///{cache_path / 'imdb.sqlite'}"
+    db_url = f"postgresql://postgres:pass@localhost/imdb"
+    print(db_url)
+    import sys
+
+    sys.exit(0)
     subprocess.run(
         ["s32imdbpy.py", "--verbose", str(cache_path), db_url], check=True,
     )
@@ -80,7 +84,7 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
                     if "year" in movie:
                         dates.append(movie["year"])
         graph.add((person_term, imdb_ns.term("work_start"), rdflib.Literal(min(dates))))
-        graph.add((person_term, imdb_ns.term("work_stop" ), rdflib.Literal(max(dates))))
+        graph.add((person_term, imdb_ns.term("work_stop"), rdflib.Literal(max(dates))))
 
         for award in person.get("awards", []):
             graph.add((person_term, imdb_ns.term("award"), rdflib.Literal(award),))
@@ -91,9 +95,21 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
             )
 
         if "birth date" in person:
-            graph.add((person_term, imdb_ns.term("birth_date"), rdflib.Literal(person["birth date"], datatype=rdflib.XSD.date)))
+            graph.add(
+                (
+                    person_term,
+                    imdb_ns.term("birth_date"),
+                    rdflib.Literal(person["birth date"], datatype=rdflib.XSD.date),
+                )
+            )
 
         if "death date" in person:
-            graph.add((person_term, imdb_ns.term("death_date"), rdflib.Literal(person["death date"], datatype=rdflib.XSD.date)))
+            graph.add(
+                (
+                    person_term,
+                    imdb_ns.term("death_date"),
+                    rdflib.Literal(person["death date"], datatype=rdflib.XSD.date),
+                )
+            )
 
     return graph

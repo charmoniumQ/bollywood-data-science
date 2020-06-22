@@ -1,4 +1,4 @@
-from . import parser as parser, plugin as plugin
+from . import XSD as XSD, parser as parser, plugin as plugin
 from .graph import Graph as Graph
 from .namespace import Namespace as Namespace
 from .term import (
@@ -8,4 +8,3 @@ from .term import (
     URIRef as URIRef,
     Variable as Variable,
 )
-from . import XSD as XSD
