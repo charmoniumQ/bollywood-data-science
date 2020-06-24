@@ -1,9 +1,13 @@
 queries:
-  wikidata_get: &wikidata_get
+  defaults: &defaults
+    minify: true
+    headers: {"Accept": "text/plain", "User-Agent": "BOT (github.com/charmoniumQ/bollywood-data-science; sam@samgrayson.me)"}
+    return_format: n3
+    method: POST
     endpoint: https://query.wikidata.org/sparql
-    return_format: xml
-    headers: {"Accept": "application/sparql-results+xml"}
-    method: GET
+    params: {}
+  wikidata_get: &wikidata_get
+    <<: *defaults
     query: |
       PREFIX wd: <http://www.wikidata.org/entity/>
       PREFIX wdt: <http://www.wikidata.org/prop/direct/>
@@ -46,5 +50,4 @@ queries:
 
   wikidata_post:
     <<: *wikidata_get
-    headers: {"Accept": "application/sparql-results+xml", "Content-Type": "application/sparql-query"}
     method: POST

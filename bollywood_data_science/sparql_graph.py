@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import urllib.parse
@@ -12,12 +13,11 @@ import requests
 def sparql_graph(
     endpoint: str,
     query: str,
-    return_format: str = "XML",
-    headers: Optional[Dict[str, str]] = None,
-    method: str = "POST",
-    params: Optional[Dict[str, str]] = None,
-    minify: bool = False,
-    **kwargs: Any,
+    return_format: str,
+    headers: Dict[str, str],
+    method: str,
+    params: Dict[str, str],
+    minify: bool,
 ) -> rdflib.Graph:
     """Query a SPARQL endpoint, but cache the resulting RDF"""
 
@@ -25,53 +25,18 @@ def sparql_graph(
         query = re.sub(r"\s+", " ", query.strip())
 
     if "CONSTRUCT" not in query:
-        raise ValueError("Must use a CONSTRUCT query to build a graph.")
+        raise ValueError("Must be a CONSTRUCT query")
 
-    headers_ = headers if headers else dict()
-    params_ = params if params else dict()
-
-    # This ensures sure I never use params where I meant params_
-    del headers, params
-
-    if method == "POST":
-        http_rsp = requests.post(
-            url=endpoint,
-            headers=headers_,
-            data="query=" + urllib.parse.quote(query),
-            **kwargs,
-        )
-    elif method == "GET":
-        http_rsp = requests.get(
-            url=endpoint, headers=headers_, params={"query": query, **params_}, **kwargs
-        )
-    else:
-        raise RuntimeError(f"Method {method} is not supported (GET, POST)")
-
-    try:
-        http_rsp.raise_for_status()
-    except requests.HTTPError:
-        print(http_rsp.text, file=sys.stderr)
-
-    text_req = http_rsp.text
-
-    if rdflib.plugin.get(return_format, rdflib.parser.Parser):
-        graph = rdflib.Graph()
-        try:
-            graph.parse(data=text_req, format=return_format)
-        except Exception as e:
-            with open("temp.txt", "w+") as f:
-                f.write(text_req)
-            raise e
-        return graph
-    else:
-        raise RuntimeError(f"rdflib has no plugin for {return_format}")
-
+    graph = rdflib.Graph()
+    url = endpoint + "?query=" + urllib.parse.quote_plus(query)
+    graph.parse(url)
+    return graph
 
 cached_sparql_graph = cast(
     Callable[..., rdflib.Graph],
     ch_time_block.decor()(
         ch_cache.decor(
-            ch_cache.DirectoryStore.create("/tmp/tmp"),
+            ch_cache.DirectoryStore.create("tmp"),
             verbose=True,
             name="cache_sparql_graph",
         )(sparql_graph)

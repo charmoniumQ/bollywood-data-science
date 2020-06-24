@@ -32,7 +32,6 @@ imdb_source_urls = [
 ]
 
 
-@ch_cache.decor(ch_cache.FileStore.create("/tmp/tmp"), verbose=True)
 def download_imdb(cache_path: Path) -> str:
     async def async_part() -> None:
         async with aiohttp.ClientSession() as session:
@@ -49,20 +48,21 @@ def download_imdb(cache_path: Path) -> str:
 
     asyncio.run(async_part())
     # db_url = f"sqlite:///{cache_path / 'imdb.sqlite'}"
-    db_url = f"postgresql://postgres:pass@localhost/imdb"
+    db_url = "postgresql://postgres:pass@localhost/imdb"
     print(db_url)
-    import sys
-
-    sys.exit(0)
     subprocess.run(
         ["s32imdbpy.py", "--verbose", str(cache_path), db_url], check=True,
     )
     return db_url
 
 
-def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
-    download_imdb(Path("/tmp/tmp"))
-    ia = IMDb("s3", "postgres://user:password@localhost/imdb")
+@ch_cache.decor(ch_cache.DirectoryStore.create("tmp"), verbose=True)
+def imdb_graph(imdb_ids: Set[str], db: bool) -> rdflib.Graph:
+    if db:
+        db_url  = download_imdb(Path("tmp"))
+        ia = IMDb("s3", db_url)
+    else:
+        ia = IMDb()
     graph = rdflib.Graph()
     imdb_ns = rdflib.Namespace("https://imdb.com/")
 
@@ -71,20 +71,36 @@ def imdb_graph(imdb_ids: Set[str]) -> rdflib.Graph:
         person_term = rdflib.Literal(imdb_id)
 
         dates = []
-        for filmography in person.get("filmography", {}):
+        filmography = person.get("filmography", {})
+        if True:
+            if not isinstance(filmography, dict):
+                raise TypeError(repr(type(filmography)))
+            # filmographies = []
+            # if isinstance(filmography_, dict):
+            #     filmographes = [filmography_]
+            # elif isinstance(filmography_, list):
+            #     assert(isinstance(filmographies[0], dict))
+            #     filmographies = filmography_
+            # else:
+            #     raise TypeError(repr(type(filmography_)))
             for role in filmography.keys():
                 for movie in filmography.get(role, []):
                     graph.add(
                         (
                             person_term,
-                            imdb_ns.term(f"filmography/{role}"),
+                            imdb_ns.term(f"filmography/{urllib.parse.quote_plus(role)}"),
                             rdflib.Literal(f"tt{movie.movieID}"),
                         )
                     )
                     if "year" in movie:
                         dates.append(movie["year"])
-        graph.add((person_term, imdb_ns.term("work_start"), rdflib.Literal(min(dates))))
-        graph.add((person_term, imdb_ns.term("work_stop"), rdflib.Literal(max(dates))))
+
+        if 'filmography' not in person.keys():
+            print(f"No filmography for person {imdb_id}")
+
+        if dates:
+            graph.add((person_term, imdb_ns.term("work_start"), rdflib.Literal(min(dates))))
+            graph.add((person_term, imdb_ns.term("work_stop"), rdflib.Literal(max(dates))))
 
         for award in person.get("awards", []):
             graph.add((person_term, imdb_ns.term("award"), rdflib.Literal(award),))

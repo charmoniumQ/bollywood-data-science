@@ -146,7 +146,7 @@ description = "Provides a decorator for caching a function and an equivalent com
 name = "charmonium.cache"
 optional = false
 python-versions = ">=3.6,<4.0"
-version = "0.6.0"
+version = "0.5.1"
 
 [[package]]
 category = "main"
@@ -230,6 +230,7 @@ version = "2020.6.21"
 [package.dependencies]
 SQLAlchemy = "*"
 lxml = "*"
+tqdm = "*"
 
 [package.extras]
 dev = ["flake8", "flake8-isort", "readme-renderer"]
@@ -237,9 +238,9 @@ doc = ["sphinx", "sphinx-rtd-theme"]
 test = ["pytest", "pytest-cov", "pytest-profiling"]
 
 [package.source]
-reference = "6091b7b390993d404e2de1aaf1e991f107c79c70"
+reference = "8cfb829109c089ad7317d055e22ccc67f3cb0251"
 type = "git"
-url = "https://github.com/alberanid/imdbpy"
+url = "https://github.com/charmoniumQ/imdbpy.git"
 
 [[package]]
 category = "dev"
@@ -790,7 +791,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "3057adaefe9076481595c3939f072e860c545d081350fdadf024db2a6a491fb2"
+content-hash = "580d66eb69fb3805102af2dc11782d815c483b5b8d3781cf107988a34b4ffbd7"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -856,8 +857,8 @@ chardet = [
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 "charmonium.cache" = [
-    {file = "charmonium.cache-0.6.0-py3-none-any.whl", hash = "sha256:a55f30873dc009545444213577d357d01d392860c3d8b48e491e0a72b1c71c25"},
-    {file = "charmonium.cache-0.6.0.tar.gz", hash = "sha256:f07ac0b1e6d3b759ba01dee3549a7fe01cb1f6bd4ceb6cddc203abc8cdf022a1"},
+    {file = "charmonium.cache-0.5.1-py3-none-any.whl", hash = "sha256:7d81adb85a9ffaf313653fed04af520aff3bf75768c26d65cbcc7084a1f1380a"},
+    {file = "charmonium.cache-0.5.1.tar.gz", hash = "sha256:1a64196464d08a80eb40b9a2ce8bf110b84f684ddcaa1eaeb5ff12a999706971"},
 ]
 "charmonium.time-block" = [
     {file = "charmonium.time_block-0.1.0-py3-none-any.whl", hash = "sha256:c34db79f3a5b7f0d1c6e6067dcb00920c583bc9f2e758759be7229b3c5a06b44"},
