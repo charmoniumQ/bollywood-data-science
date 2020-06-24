@@ -29,9 +29,8 @@ def main() -> None:
         }
     print(dict(triples=len(graph), people=len(people), imdb_ids=len(imdb_ids),))
     imdb_ids = sorted(imdb_ids)
-    args = dict(enumerate(sys.argv))
-    start = args.get(1)
-    stop  = args.get(2)
+    start = int(sys.argv[1])
+    stop  = int(sys.argv[2])
     graph_imdb = imdb_graph(imdb_ids[start:stop], db=False)
     print(dict(graph_imdb=len(graph_imdb)))
 
