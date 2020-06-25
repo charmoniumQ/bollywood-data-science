@@ -1,5 +1,7 @@
+import collections
+import string
 import sys
-from typing import Dict, cast
+from typing import Dict, cast, Set, Mapping, Any, Callable
 
 import charmonium.time_block as ch_time_block
 import rdflib
@@ -51,9 +53,26 @@ def main() -> None:
     else:
         divisions = list(range(0, len(imdb_ids), len(imdb_ids) // 15))
         print("\n".join(map(str, (enumerate(zip(divisions[:-1], divisions[1:]))))))
-        # graph_imdb = rdflib.Graph()
-        # for start, stop in zip(divisions[:-1], divisions[1:]):
-        #     graph_imdb += imdb_graph(imdb_ids[start:stop], db=False)
+        graph = rdflib.Graph()
+        for start, stop in zip(divisions[:-1], divisions[1:]):
+            graph += imdb_graph(imdb_ids[start:stop], db=False)
+
+def graph_to_csv(graph: rdflib.Graph, id_col: rdflib.term.Node, stringifier: Callable[[rdflib.term.Node], str] = str) -> str:
+        verb_set: Set[rdflib.term.Node] = set(
+            row[0]
+            for row in graph.query("SELECT DISTINCT ?verb WHERE { ?subject ?verb ?object . }")
+        )
+        person_dicts: Mapping[rdflib.term.Node, Mapping[str, Any]] = collections.defaultdict(dict)
+        names: Mapping[str, rdflib.term.Node] = dict()
+        for person, verb, object in graph:
+            person_dicts[person][verb] = object
+            if verb == "name":
+                name: str = object.toPython() # type: ignore
+                names[name.lower()] = person
+        for letter in string.ascii_lowercase:
+            for name, person in names.items():
+                if name.startswith(letter):
+                    person_dicts
 
 
 if __name__ == "__main__":

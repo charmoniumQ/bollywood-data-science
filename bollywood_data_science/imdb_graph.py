@@ -128,6 +128,6 @@ def imdb_graph(
             )
 
         if "name" in person:
-            graph.add((person_term, imdb_ns.term("name"), person["name"]))
+            graph.add((person_term, imdb_ns.term("name"), rdflib.Literal(person["name"])))
 
     return graph
