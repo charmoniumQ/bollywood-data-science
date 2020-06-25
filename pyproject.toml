@@ -27,6 +27,7 @@ tqdm = "^4.46.1"
 psycopg2 = "^2.8.5"
 imdbpy = {git = "https://github.com/charmoniumQ/imdbpy.git"}
 "charmonium.cache" = "^0.5.1"
+google-cloud-storage = "^1.29.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "^1.3.1"

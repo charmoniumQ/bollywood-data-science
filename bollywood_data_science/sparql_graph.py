@@ -1,8 +1,6 @@
-import os
 import re
-import sys
 import urllib.parse
-from typing import Any, Callable, Dict, Optional, cast
+from typing import Callable, Dict, cast
 
 import charmonium.cache as ch_cache
 import charmonium.time_block as ch_time_block
@@ -31,6 +29,7 @@ def sparql_graph(
     url = endpoint + "?query=" + urllib.parse.quote_plus(query)
     graph.parse(url)
     return graph
+
 
 cached_sparql_graph = cast(
     Callable[..., rdflib.Graph],
