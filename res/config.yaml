@@ -1,17 +1,13 @@
 queries:
   defaults: &defaults
-    minify: true
-    headers: {"Accept": "text/plain", "User-Agent": "BOT (github.com/charmoniumQ/bollywood-data-science; sam@samgrayson.me)"}
-    return_format: n3
-    method: POST
-    endpoint: https://query.wikidata.org/sparql
-    params: {}
   wikidata_get: &wikidata_get
     <<: *defaults
     query: |
       PREFIX wd: <http://www.wikidata.org/entity/>
       PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       CONSTRUCT {
+        ?person rdf:subject ?person .
         ?person wdt:P106 ?occupation .
         ?person wdt:P345 ?personImdbId .
         ?person wdt:P21 ?sex . 
@@ -27,12 +23,6 @@ queries:
         ?person wdt:1412 ?langauage .
         ?person wdt:P39 ?positionHeld .
       } WHERE {
-        ?person wdt:P106 wd:Q33999 .
-        {
-          { ?person wdt:P27 wd:Q668 . } UNION
-          { ?person wdt:P19/wdt:P17 wd:Q668 . } UNION
-          { ?person wdt:P19/wdt:P17? wd:Q129286 . } .
-        } .
         OPTIONAL { ?person wdt:P21 ?sex . } .
         OPTIONAL { ?person wdt:P345 ?personImdbId . } .
         OPTIONAL { ?person wdt:P19 ?placeOfBirth . } .
@@ -48,6 +38,7 @@ queries:
         OPTIONAL { ?person wdt:P39 ?positionHeld . } .
       }
 
+    # mother, father, stepParent, spouse, child, relative, sibling
   wikidata_post:
     <<: *wikidata_get
     method: POST

@@ -81,9 +81,7 @@ def imdb_graph(
                     graph.add(
                         (
                             person_term,
-                            imdb_ns.term(
-                                f"filmography/{urllib.parse.quote_plus(role)}"
-                            ),
+                            imdb_ns.term(f"filmography_{role.replace(' ' , '_')}"),
                             rdflib.Literal(f"tt{movie.movieID}"),
                         )
                     )
@@ -128,6 +126,16 @@ def imdb_graph(
             )
 
         if "name" in person:
-            graph.add((person_term, imdb_ns.term("name"), rdflib.Literal(person["name"])))
+            graph.add(
+                (person_term, imdb_ns.term("name"), rdflib.Literal(person["name"]))
+            )
+        elif "canonical name" in person:
+            graph.add(
+                (
+                    person_term,
+                    imdb_ns.term("name"),
+                    rdflib.Literal(person["canonical name"]),
+                )
+            )
 
     return graph
