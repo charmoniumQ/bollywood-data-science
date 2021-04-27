@@ -1,8 +1,8 @@
 import csv
 import io
-import time
 import re
 import sys
+import time
 import urllib.parse
 from typing import Callable, Dict, List, Optional, cast
 
@@ -41,8 +41,7 @@ cached_sparql_graph = cast(
         ch_cache.decor(
             ch_cache.DirectoryStore.create("tmp"),
             verbose=True,
-            name="cache_sparql_graph",
-        )(sparql_graph)
+         )(sparql_graph)
     ),
 )
 
@@ -114,7 +113,7 @@ def wikidata_label(full_item: str) -> str:
             minify=True,
         )
         time.sleep(0.5)
-        assert results[0] == ['wdLabel']
+        assert results[0] == ["wdLabel"]
         return results[1][0]
     elif item.startswith("Q"):
         return full_item
@@ -123,7 +122,8 @@ def wikidata_label(full_item: str) -> str:
 
 
 cached_wikidata_label = cast(
-    Callable[[str], str], ch_cache.decor(ch_cache.FileStore.create("tmp"))(wikidata_label)
+    Callable[[str], str],
+    ch_cache.decor(ch_cache.FileStore.create("tmp"))(wikidata_label),
 )
 
-cached_wikidata_label.disable_logging() # type: ignore
+cached_wikidata_label.disable_logging()  # type: ignore

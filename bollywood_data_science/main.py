@@ -1,16 +1,15 @@
 import collections
 import csv
-import itertools
 import sys
-from typing import Dict, List, cast, Optional, IO, TypeVar, Mapping, Iterable
+from typing import IO, Dict, Iterable, List, cast
 
 import charmonium.time_block as ch_time_block
 import rdflib
 from tqdm import tqdm
 
-from .imdb_graph import imdb_graph
-from .sparql_graph import cached_sparql_graph, cached_wikidata_label
 from .disjoint_set import DisjointSet
+from .imdb_graph import imdb_graph
+from .sparql_graph import cached_sparql_graph
 
 
 def is_int(string: str) -> bool:
@@ -24,13 +23,18 @@ def is_int(string: str) -> bool:
 
 def main() -> None:
     person_filter = """
-        ?person wdt:P106 wd:Q33999 .
+        ?person wdt:P106 ?occupation .
+        FILTER(?occupation in (wd:Q33999, wd:Q947873, wd:Q10800557, wd:Q10798782, wd:Q947873, wd:Q3282637, wd:Q28389, wd:Q2526255)) .
         {
           { ?person wdt:P27 wd:Q668 . } UNION
           { ?person wdt:P19/wdt:P17 wd:Q668 . } UNION
           { ?person wdt:P19/wdt:P17? wd:Q129286 . } .
         } .
-        """.replace("\n        ", "\n")[1:-1]
+        """.replace(
+        "\n        ", "\n"
+    )[
+        1:-1
+    ]
     info_query = """
       PREFIX wd: <http://www.wikidata.org/entity/>
       PREFIX wdt: <http://www.wikidata.org/prop/direct/>
@@ -46,7 +50,7 @@ def main() -> None:
         ?person wdt:P39 ?positionHeld .
       } WHERE {
         person_filter
-        OPTIONAL { ?person wdt:P21 ?sex . } .
+        ?person wdt:P21 ?sex .
         OPTIONAL { ?person wdt:P345 ?personImdbId . } .
         OPTIONAL { ?person wdt:P19 ?placeOfBirth . } .
         OPTIONAL { ?person wdt:P69 ?school . } .
@@ -56,20 +60,26 @@ def main() -> None:
         OPTIONAL { ?person wdt:1412 ?langauage . } .
         OPTIONAL { ?person wdt:P39 ?positionHeld . } .
       }
-      """.replace("\n      ", "\n").replace("person_filter", person_filter)[1:-1]
+      """.replace(
+        "\n      ", "\n"
+    ).replace(
+        "person_filter", person_filter
+    )[
+        1:-1
+    ]
 
     params = dict(
         minify=True,
-        headers={"Accept": "text/plain", "User-Agent": "BOT (github.com/charmoniumQ/bollywood-data-science; sam@samgrayson.me)"},
+        headers={
+            "Accept": "text/plain",
+            "User-Agent": "BOT (github.com/charmoniumQ/bollywood-data-science; sam@samgrayson.me)",
+        },
         return_format="n3",
         method="POST",
         endpoint="https://query.wikidata.org/sparql",
         params={},
     )
-    info_graph = cached_sparql_graph(
-        query=info_query,
-        **params
-    )
+    info_graph = cached_sparql_graph(query=info_query, **params)
 
     family_query = """
       PREFIX wd: <http://www.wikidata.org/entity/>
@@ -92,18 +102,18 @@ def main() -> None:
         OPTIONAL { ?person wdt:P26 ?spouse . } .
         OPTIONAL { ?person wdt:P40 ?child . } .
       }
-      """.replace("\n      ", "\n").replace("person_filter", person_filter)[1:-1]
+      """.replace(
+        "\n      ", "\n"
+    ).replace(
+        "person_filter", person_filter
+    )[
+        1:-1
+    ]
 
-    familial_graph = cached_sparql_graph(
-        query=family_query,
-        **params
-    )
+    familial_graph = cached_sparql_graph(query=family_query, **params)
 
     with ch_time_block.ctx("selecting"):
-        people = {
-            person.toPython()
-            for person, prop, thing in info_graph
-        }
+        people = {person.toPython() for person, prop, thing in info_graph}
         imdb_ids_: Dict[rdflib.term.Node, str] = dict()
         for person_, imdb_id_ in info_graph.query(
             "SELECT DISTINCT ?person ?personImdbId WHERE { ?person wdt:P345 ?personImdbId }"
@@ -135,47 +145,53 @@ def main() -> None:
         families_uf: DisjointSet[rdflib.term.Node] = DisjointSet()
         for person, _, relative in familial_graph:
             families_uf.add(person, relative)
-        name_col = cast(rdflib.term.Node, rdflib.term.URIRef("https://imdb.com/name"))
+        name_col = rdflib.URIRef("https://imdb.com/name")
         with open("families.txt", "w+") as f:
-            families = sorted(families_uf.group.values(), key=family_weight, reverse=True)
+            families = sorted(
+                families_uf.group.values(), key=family_weight, reverse=True
+            )
             for family in families:
-                print(len(family), file=f)
+                print(family_weight(family), file=f)
                 for member in family:
                     if member in person_info_records:
-                        name = str(person_info_records[member][name_col])
-                        prefix = '*'
+                        prefix = "*"
+                        names = person_info_records[member][name_col]
+                        name = ','.join(map(str, names)) if names else ""
                     else:
-                        name = ''
-                        prefix = ' '
+                        name = ""
+                        prefix = " "
                     print(prefix, str(member), name, file=f)
+                print(file=f)
+
 
 @ch_time_block.decor()
-def records_to_csv(records: Dict[rdflib.term.Node, Dict[rdflib.term.Node, List[rdflib.term.Node]]], file_: IO[str]) -> None:
-    name_col = cast(rdflib.term.Node, rdflib.term.URIRef("https://imdb.com/name"))
-    imdb_col = cast(
-        rdflib.term.Node, rdflib.term.URIRef("http://www.wikidata.org/prop/direct/P345")
-    )
+def records_to_csv(
+    records: Dict[rdflib.term.Node, Dict[rdflib.term.Node, List[rdflib.term.Node]]],
+    file_: IO[str],
+) -> None:
+    name_col = rdflib.URIRef("https://imdb.com/name")
+    imdb_col = rdflib.URIRef("http://www.wikidata.org/prop/direct/P345")
     cols_set = set(key for record in records.values() for key in record.keys())
 
-    cols = [name_col, imdb_col] + sorted(
-        cols_set - {name_col, imdb_col}
-    )
+    cols = [name_col, imdb_col] + sorted(cols_set - {name_col, imdb_col})
 
     csvw = csv.writer(file_)
     csvw.writerow(["Wikidata ID", *map(rdf_term_to_str, cols)])
-    for wikidata_id, person in tqdm(records.items()):
+    for wikidata_id, person in tqdm(sorted(records.items())):
         csvw.writerow(
-            [rdf_term_to_str(wikidata_id), *(" ".join(map(rdf_term_to_str, person.get(col, []))) for col in cols)]
+            [
+                rdf_term_to_str(wikidata_id),
+                *(" ".join(map(rdf_term_to_str, person.get(col, []))) for col in cols),
+            ]
         )
 
 
 def rdf_term_to_str(term: rdflib.term.Node) -> str:
-    if isinstance(term, rdflib.term.URIRef):
+    if isinstance(term, rdflib.URIRef):
         py_url = cast(str, term.toPython())
         if py_url.startswith("https://imdb.com/"):
             return py_url[17:]
         elif py_url.startswith("http://www.wikidata.org/"):
-            # return cached_wikidata_label(py_url)
             return py_url
         else:
             return py_url
@@ -194,7 +210,7 @@ def rdf_term_to_str(term: rdflib.term.Node) -> str:
 
 @ch_time_block.decor()
 def graph_to_records(
-        graph: rdflib.Graph,
+    graph: rdflib.Graph,
 ) -> Dict[rdflib.term.Node, Dict[rdflib.term.Node, List[rdflib.term.Node]]]:
 
     subject_dicts: Dict[
