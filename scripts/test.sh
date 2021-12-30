@@ -59,7 +59,9 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
-			autoflake --recursive ${flag_check_or_in_place} ${srcs}
+			autoflake \
+			--expand-star-imports --ignore-init-module-imports --remove-duplicate-keys --remove-unused-variables \
+			--recursive ${flag_check_or_in_place} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
@@ -69,39 +71,41 @@ flag_check=$([ -n "${check}" ] && echo "--check")
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
-			black --quiet --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
+			black --target-version py38 ${flag_check} ${flag_verbose_or_quiet} ${srcs}
 
 [[ -n "${skip_lint}" ]] || \
 	capture \
 		poetry run \
-			sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || poetry run pylint-exit -efail \${?} > /dev/null"
+			sh -c "pylint ${flag_verbose} ${package_path} ${other_srcs} || true"
 
 capture \
 	poetry run \
 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
-			mypy --namespace-packages -p ${package_name}
-capture \
-	poetry run \
-		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
-			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
+			dmypy run -- --namespace-packages -p ${package_name}
+# capture \
+# 	poetry run \
+# 		env PYTHONPATH=".:${PYTHONPATH}" MYPYPATH="./stubs:${MYPYPATH}" \
+# 			mypy --namespace-packages $(excluding "stubs" $(excluding "${package_path}" ${srcs}))
 # ${flag_verbose} is too verbose here
 
 # Note that I can't use dmypy because I have a package (-p) and files
 # to check, which are (unfortunately) mutually exclusive arguments.
 
-capture \
-	poetry run \
-		pytest --quiet --exitfirst  --cov="${package_path}" --cov-report=term-missing  tests
+# capture \
+# 	poetry run \
+# 		pytest --quiet --exitfirst  --cov="${package_path}" --cov-report=term-missing  tests
 # I only care about --cov= in the exported package
 
-[[ -z "${htmlcov}" ]] || \
-	xdg-open htmlcov/index.html
+# [[ -z "${htmlcov}" ]] || \
+# 	xdg-open htmlcov/index.html
+
+# poetry run \
+# 	coverage html -d htmlcov
+
+# [[ -z "${CODECOV_TOKEN}" ]] || \
+# 	capture \
+# 		poetry run \
+# 			codecov
 
 poetry run \
-	coverage html -d htmlcov
-
-[[ -z "${CODECOV_TOKEN}" ]] || \
-	capture \
-		poetry run \
-			codecov
-
+	python3 -m ${package_name}.main
